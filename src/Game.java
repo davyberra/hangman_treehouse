@@ -1,3 +1,5 @@
+import java.util.Locale;
+
 class Game {
     private String answer;
     private String hits;
@@ -5,12 +7,24 @@ class Game {
     public static final int MAX_MISSES = 7;
 
     public Game(String answer) {
-        this.answer = answer;
+        this.answer = answer.toLowerCase();
         hits = "";
         misses = "";
     }
 
+    private char normalizedGuess(char letter) {
+        if (! Character.isLetter(letter)) {
+            throw new IllegalArgumentException("A letter is required.");
+        }
+        letter = Character.toLowerCase(letter);
+        if (misses.indexOf(letter) != -1 || hits.indexOf(letter) != -1) {
+            throw new IllegalArgumentException("'" + letter + "' has already been guessed");
+        }
+        return letter;
+    }
+
     public boolean applyGuess(char letter) {
+        letter = normalizedGuess(letter);
         boolean isHit = answer.indexOf(letter) != -1;
         if (isHit) {
             hits += letter;
@@ -18,6 +32,13 @@ class Game {
             misses += letter;
         }
         return isHit;
+    }
+
+    public boolean applyGuess(String letters) {
+        if (letters.length() == 0) {
+            throw new IllegalArgumentException("No letter found.");
+        }
+        return applyGuess(letters.charAt(0));
     }
 
     public int getRemainingTries() {
@@ -34,6 +55,14 @@ class Game {
             progress += display;
         }
         return progress;
+    }
+
+    public boolean isWon() {
+        return getCurrentProgress().indexOf('_') == -1;
+    }
+
+    public boolean isLost() {
+        return misses.length() == MAX_MISSES;
     }
 
 }
